@@ -88,7 +88,7 @@ if add_profile:
 
         df['month'] = df['date'].dt.month
         df['year'] = df['date'].dt.year
-        df['length'] = df['tweet'].apply(lambda x: len(x.split()))
+        df['tweets'] = df['tweet'].apply(lambda x: len(x.split()))
         df['hashtags'] = df['tweet'].apply(lambda x: get_hashtags(x))
         df['mentions'] = df['tweet'].apply(lambda x: get_mentions(x))
         df['num_hashtags'] = df['tweet'].apply(lambda x: len(get_hashtags(x)))
@@ -96,8 +96,11 @@ if add_profile:
         df['hour'] = df['date'].dt.hour
 
         # Example plot: hour vs length
-        df_HL = df[["hour", "length"]]
+        df_HL = df[["hour", "tweets"]]
         df_HL = df_HL.groupby(['hour']).mean()
+
+        st.title('Average tweets per hour.')
+        st.header('from {} to {}'.format(start_date, end_date))
         st.bar_chart(data=df_HL, width=0, height=0, use_container_width=True)
 
         # Example plot: top 10 hashtags
@@ -107,6 +110,9 @@ if add_profile:
             if x:
                 tags.extend(x)
         df_tags = pd.DataFrame(tags, columns=['hashtag'])
+
+        st.title('Top 10 hashtags.')
+        st.header('from {} to {}'.format(start_date, end_date))
         st.bar_chart(data=df_tags['hashtag'].value_counts().head(
             10), width=0, height=0, use_container_width=True)
 
