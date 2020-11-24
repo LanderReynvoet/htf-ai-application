@@ -41,18 +41,21 @@ add_text = st.sidebar.title(
 )
 
 # Create date selection for streamlit
-add_today = datetime.date.today()
-add_yesterday = add_today - datetime.timedelta(days=1)
+today = datetime.date.today()
+add_yesterday = today - datetime.timedelta(days=7)
 
 start_date = st.sidebar.date_input('Start date', add_yesterday)
-end_date = st.sidebar.date_input('End date', add_today)
+end_date = st.sidebar.date_input('End date', today)
 
-# Warning if dates order is not correct.
+# Warning if dates are not correct.
 if start_date > end_date:
     st.sidebar.error('End date must fall after start date.')
 
+if end_date > today:
+    st.sidebar.error("Sorry but we can't see in the future, please a correct end date.")
+
 # add_text_search = st.sidebar.write('Enter your search keyword:')
-add_search = st.sidebar.text_input('Enter you search', '')
+add_profile = st.sidebar.text_input('Enter twitter username', '')
 ######## End sidebar #######
 
 ######## Streamit main #######
@@ -66,14 +69,14 @@ c.Limit = 100
 c.lang = "en"
 c.Since = start_date
 c.Until = end_date
-c.Search = add_search
+c.Username = add_profile
 c.Hide_output = True
 c.Pandas = True
 c.Popular_tweets = True
 #
 
 # if keyword(s) for search, start showing graph in dashboard
-if add_search:
+if add_profile:
     print('Searching now...')
     twint.run.Search(c)
     df = twint.storage.panda.Tweets_df
