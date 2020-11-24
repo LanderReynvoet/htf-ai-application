@@ -6,6 +6,8 @@ import re
 import numpy as np
 import datetime
 import time
+import torch
+from transformers import T5ForConditionalGeneration, T5Tokenizer, pipeline
 
 def get_hashtags(text):
     """Function to extract hashtags from tweets"""
@@ -80,7 +82,7 @@ if add_profile:
     print('Searching now...')
     twint.run.Search(c)
     df = twint.storage.panda.Tweets_df
-    time.sleep(10)
+    #time.sleep(10)
     print("Done")
 
     if len(df) > 1:
@@ -121,26 +123,32 @@ if add_profile:
         df['cleaned_tweets'] = df['cleaned_tweets'].str.rstrip().str.lstrip()
         s = '.'.join(df.loc[:, 'cleaned_tweets'])
 
-        # # Example NLP with transformers (transformer + pytorch)
-        # # initialize the model architecture and weights
-        # model = T5ForConditionalGeneration.from_pretrained("t5-small")
+        # Example NLP with transformers (transformer + pytorch)
+        # initialize the model architecture and weights
+        model = T5ForConditionalGeneration.from_pretrained("t5-small")
 
-        # # initialize the model tokenizer
-        # tokenizer = T5Tokenizer.from_pretrained("t5-small")
+        # initialize the model tokenizer
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
-        # inputs = tokenizer.encode(
-        #     "summarize: " + s, return_tensors="pt", max_length=512, truncation=True)
+        inputs = tokenizer.encode(
+            "summarize: " + s, return_tensors="pt", max_length=512, truncation=True)
 
-        # # generate the summarization output
-        # outputs = model.generate(
-        #     inputs,
-        #     max_length=150,
-        #     min_length=40,
-        #     length_penalty=2.0,
-        #     num_beams=4,
-        #     early_stopping=True)
-        # st.write(tokenizer.decode(outputs[0]))
+        # generate the summarization output
+        outputs = model.generate(
+            inputs,
+            max_length=510,
+            min_length=40,
+            length_penalty=2.0,
+            num_beams=4,
+            early_stopping=True)
+        st.write(tokenizer.decode(outputs[0]))
 
+        classifier = pipeline('sentiment-analysis')
+
+        label = classifier(tokenizer.decode(outputs[0]))[0]["label"]
+        score = classifier(tokenizer.decode(outputs[0]))[0]["score"]
+
+        st.write("this text is " + label  + " with score: " + str(round(score, 5)))
 
 #### Extra streamlit for info ####
 # Add drop down menu
