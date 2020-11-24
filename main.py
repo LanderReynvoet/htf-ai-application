@@ -75,11 +75,14 @@ c.Username = add_profile
 c.Hide_output = True
 c.Pandas = True
 c.Popular_tweets = True
+c.Store_object = True
 #
 
 # if keyword(s) for search, start showing graph in dashboard
 if add_profile:
     print('Searching now...')
+    
+    st.title("Report for Twitter user :" + add_profile)
     twint.run.Search(c)
     df = twint.storage.panda.Tweets_df
     #time.sleep(10)
@@ -141,14 +144,29 @@ if add_profile:
             length_penalty=2.0,
             num_beams=4,
             early_stopping=True)
-        st.write(tokenizer.decode(outputs[0]))
 
+        st.header("This is a summary from all the tweets form " + start_date + " till " + end_date)
+
+        st.write(tokenizer.decode(outputs[0]))
         classifier = pipeline('sentiment-analysis')
 
         label = classifier(tokenizer.decode(outputs[0]))[0]["label"]
         score = classifier(tokenizer.decode(outputs[0]))[0]["score"]
 
-        st.write("this text is " + label  + " with score: " + str(round(score, 5)))
+        st.write("The sentiment of this summary is: " + label  + " with a score of: " + str(round(score, 5)))
+
+        for tweet in df['cleaned_tweets']:
+            st.write("")
+            st.write(tweet)
+
+            classifier = pipeline('sentiment-analysis')
+
+            label = classifier(tweet)[0]["label"]
+            score = classifier(tweet)[0]["score"]
+
+            st.write("The sentiment of this tweet is : " + label  + " with a score of: " + str(round(score, 5)))
+
+        
 
 #### Extra streamlit for info ####
 # Add drop down menu
